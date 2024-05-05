@@ -1,0 +1,9 @@
+parse a normal JSON file [done]
+parse a not-standard JSON file (with random comma) [done]
+handle wrong JSON files
+run banchmarks to faster performance
+handle node creatation if there is none such node in json file before
+  json["wow"] = "another"
+handle json file dump
+finish all questions
+organize code structure
