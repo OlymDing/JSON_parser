@@ -14,11 +14,9 @@
 #define isFloat(number)                                                        \
   number.find('.') != number.npos || number.find('e') != number.npos
 
-// how to use namespace ?
 namespace json
 {
 struct Node;
-// what is a monostate ?
 using Null = std::monostate;
 using Bool = bool;
 using String = std::string;
@@ -26,7 +24,6 @@ using Int = int64_t;
 using Float = double;
 using Array = std::vector<Node>;
 using Object = std::map<String, Node>;
-// what is a variant ?
 using Value = std::variant<Null, Bool, Int, Float, String, Array, Object>;
 
 struct Node
@@ -38,10 +35,8 @@ struct Node
 
   auto &operator[](const std::string &key)
   {
-    // what is get_if ?
     if (auto object = std::get_if<Object>(&value))
       return (*object)[key];
-    // what is runtime_error ?
     throw std::runtime_error("not an object !");
   }
 
@@ -63,7 +58,6 @@ struct Node
 
 struct JsonParser
 {
-  // what is string_view ?
   std::string_view json_str;
   size_t pos = 0;
 
@@ -74,8 +68,7 @@ struct JsonParser
       pos++;
   }
 
-  // what is optional ?
-  auto parse_null() -> std::optional<Value>
+  std::optional<Value> parse_null()
   {
     if (json_str.substr(pos, 4) == "null")
     {
@@ -85,8 +78,7 @@ struct JsonParser
     return {};
   }
 
-  // why writing like this instead of directly declearing it
-  auto parse_true() -> std::optional<Value>
+  std::optional<Value> parse_true()
   {
     if (json_str.substr(pos, 4) == "true")
     {
@@ -96,7 +88,7 @@ struct JsonParser
     return {};
   }
 
-  auto parse_false() -> std::optional<Value>
+  std::optional<Value> parse_false()
   {
     if (json_str.substr(pos, 5) == "false")
     {
@@ -106,7 +98,7 @@ struct JsonParser
     return {};
   }
 
-  auto parse_number() -> std::optional<Value>
+  std::optional<Value> parse_number()
   {
     size_t endpos = pos;
     while (endpos < json_str.size() &&
@@ -128,7 +120,6 @@ struct JsonParser
         return {};
       }
     }
-
     else
     {
       try
@@ -143,7 +134,7 @@ struct JsonParser
     }
   }
 
-  auto parse_string() -> std::optional<Value>
+  std::optional<Value> parse_string()
   {
     size_t endpos = ++pos;
     while (pos < json_str.size() && json_str[endpos] != '"')
@@ -153,7 +144,7 @@ struct JsonParser
     return ret;
   }
 
-  auto parse_value() -> std::optional<Value>
+  std::optional<Value> parse_value()
   {
     parse_whitespace();
     switch (json_str[pos])
@@ -175,7 +166,7 @@ struct JsonParser
     }
   }
 
-  auto parse_array() -> std::optional<Value>
+  std::optional<Value> parse_array()
   {
     pos++;
     Array arr;
@@ -193,7 +184,7 @@ struct JsonParser
     return arr;
   }
 
-  auto parse_object() -> std::optional<Value>
+  std::optional<Value> parse_object()
   {
     pos++;
     Object obj;
@@ -202,7 +193,6 @@ struct JsonParser
       auto key = parse_value();
 
       parse_whitespace();
-      // what is holds_alternative ?
       if (!std::holds_alternative<String>(key.value()))
         return {};
       if (pos < json_str.size() && json_str[pos] == ':')
@@ -210,7 +200,6 @@ struct JsonParser
 
       parse_whitespace();
       auto value = parse_value();
-      // what is std::get ?
       obj[std::get<String>(key.value())] = value.value();
 
       parse_whitespace();
@@ -222,7 +211,7 @@ struct JsonParser
     return obj;
   }
 
-  auto parse() -> std::optional<Node>
+  std::optional<Node> parse()
   {
     parse_whitespace();
     auto value = parse_value();
@@ -233,7 +222,7 @@ struct JsonParser
   }
 };
 
-auto parser(std::string_view json_str) -> std::optional<Node>
+std::optional<Node> parser(std::string_view json_str)
 {
   JsonParser p{json_str};
   return p.parse();
@@ -242,7 +231,7 @@ auto parser(std::string_view json_str) -> std::optional<Node>
 class JsonGenerator
 {
 public:
-  static auto generate_string(const String &str) -> std::string
+  static std::string generate_string(const String &str)
   {
     std::string json_str = "\"";
     json_str += str;
@@ -250,7 +239,7 @@ public:
     return json_str;
   };
 
-  static auto generate_array(const Array &arr) -> std::string
+  static std::string generate_array(const Array &arr)
   {
     std::string json_str = "[";
     for (const auto &node : arr)
@@ -259,14 +248,13 @@ public:
       json_str += ',';
     }
 
-    // why pop back ?
     // to get rid of the last comma
     if (!arr.empty())
       json_str.pop_back();
     json_str += ']';
     return json_str;
   };
-  static auto generate_object(const Object &obj) -> std::string
+  static std::string generate_object(const Object &obj)
   {
     std::string json_str = "{";
     for (const auto &[key, node] : obj)
@@ -281,17 +269,13 @@ public:
     json_str += '}';
     return json_str;
   };
-  static auto generate(const Node &node) -> std::string
+  static std::string generate(const Node &node)
   {
-    // what is std::visit ?
     return std::visit(
-        // auto && arg ??
         [](auto &&arg) -> std::string
         {
-          // what is decay_t and decltype ?
           using T = std::decay_t<decltype(arg)>;
-
-          // what is constexpr and std::is_same_v?
+          // what is constexpr ?
           if constexpr (std::is_same_v<T, Null>)
             return "null";
           else if constexpr (std::is_same_v<T, Bool>)
@@ -312,20 +296,17 @@ public:
   }
 };
 
-// why use inline here ?
-inline auto generate(const Node &node) -> std::string
+inline std::string generate(const Node &node)
 {
   return JsonGenerator::generate(node);
 }
 
-auto operator<<(std::ostream &out, const Node &node) -> std::ostream &
+std::ostream &operator<<(std::ostream &out, const Node &node)
 {
-  out << JsonGenerator::generate(node);
+  out << generate(node);
   return out;
 }
 } // namespace json
-
-using namespace json;
 
 int main()
 {
@@ -333,10 +314,10 @@ int main()
   std::stringstream ss;
   ss << fin.rdbuf();
   std::string s{ss.str()};
-  auto x = parser(s).value();
+  auto x = json::parser(s).value();
   std::cout << x << "\n";
   x["configurations"].push({true});
-  x["configurations"].push({Null{}});
+  x["configurations"].push({json::Null{}});
   x["version"] = {114514LL};
   std::cout << x << "\n";
 }

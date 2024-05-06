@@ -1,0 +1,62 @@
+how to use namespace ?
+  namespace handles conflict function or variable names
+  put all variable and function definitions inside a namespace can make code more readable
+
+what is a std::variant ?
+  a modern version of C's union with type-safe, runtime type-check and auto-memory features
+
+what is std::monostate ?
+  "null" for std::variant as it is not initialized
+
+what is std::holds_alternative ?
+  to see if the variant holds the value (a more elegant type check)
+
+what is std::get<type> ?
+  convert variant into the type
+
+what is std::get_if ?
+  if arg is the type, return pointer of that type, otherwise return a nullptr
+
+how to use std::visit ?
+  std::visit is used to handle variant types, normally it can pass in a struct or a function
+
+what is std::is_same_v ?
+  to judge whether the template typename is same to a target type
+
+what is std::decay_t ?
+  to remove all decorators, such as const, volatile, reference. just the type
+
+what is dectype ?
+  declared type, similar to auto, but it can get the type for further code
+
+difference between nullptr and NULL ?
+  NULL is 0, which may cause ambiguity between NULL and value 0
+  but nullptr is explictly defined to be "null", which is more mordern
+
+how to use runtime_error ?
+  throw try catch, similar to other runtime error handling features
+
+what is std::string_view ? what's the difference between std::string ?
+  a light_weight "view" of string
+  it doesn't own any data, which makes it easy and fast to copy, and safe to use
+  to access data, use string_view.data() method
+
+how to use std::optional ?
+  for handling value that may not exist (or optional, anyway)
+
+when to use a right-value reference ?
+  when passing a literal, constant value
+  get the ownership of that parameter (move)
+
+how to use constexpr ?
+  constexpr are used when the value of expression is deterministic during compile time
+  thus it can be viewed as constant
+  const values may be inititialized during compile time or run time
+  while constexpr must be initialized during compile time
+
+when to use inline functions ?
+  inline is a more strict version of #define
+  it is type safe
+  it is easier for debug
+  it has its own scope
+  if you are not designing any werid nested macro expansion, use inline as much as possible
